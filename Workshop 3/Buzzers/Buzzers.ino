@@ -1,5 +1,6 @@
 #include <NewPing.h> // include the ultrasonic sensor library
 #include <Servo.h>  // include the Servo library
+#include "TimerFreeTone.h"
 
 #define RED_LED 11
 #define BUTTON 12
@@ -14,6 +15,8 @@ NewPing sonar(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO, max_ultrasonic_distance_cm);
 #define SERVO 6
 Servo servo;
 #define BUZZER 3
+// Global Variable
+int notes[5] = {440, 494, 523, 587, 659};
 
 void setup() {
   // put your setup code here, to run once:
@@ -45,7 +48,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
 
   // PASSIVE BUZZER ONLY:
-//  play_song();
+  play_song();
 }
 
 int led_brightness = 255;
@@ -107,6 +110,27 @@ void buzz() {
   digitalWrite(BUZZER, LOW);
 }
 
+void play_song() {
+  TimerFreeTone(BUZZER, 440, 100); // A4
+
+  TimerFreeTone(BUZZER, 494, 100); // B4
+  
+  TimerFreeTone(BUZZER, 523, 100); // C4
+
+  TimerFreeTone(BUZZER, 587, 100); // D4
+
+  TimerFreeTone(BUZZER, 659, 100); // E4
+
+  TimerFreeTone(BUZZER, 0, 1000);
+
+  for (int i=0; i<5; i++) {
+    TimerFreeTone(BUZZER, notes[i], 100);
+    notes[i] = notes[i] + 100;
+  }
+  
+  TimerFreeTone(BUZZER, 0, 1000);
+}
+
 void loop() {
   // put your main code here, to run repeatedly:  
   bool led_is_off = fade_led();
@@ -125,7 +149,7 @@ void loop() {
   read_joystick();
   read_ultrasonic_sensor();
 
-//  spin_servo(0, 180);
+  spin_servo(0, 180);
 
-  buzz();
+//  buzz();
 }

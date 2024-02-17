@@ -1,3 +1,9 @@
+/*
+ * The passive buzzer "tone" library must be used separately from the bop it game code
+ * bc Arduino Uno does not have enough timers to support another PWM output.
+ */
+
+
 #define BUZZER 3
 
 // Global Variable
@@ -14,7 +20,7 @@ void loop() {
   tone(BUZZER, 440); // A4
   delay(10);
 
-  tone(BUZZER2, 494); // B4
+  tone(BUZZER, 494); // B4
   delay(10);
 
   tone(BUZZER, 523); // C4
