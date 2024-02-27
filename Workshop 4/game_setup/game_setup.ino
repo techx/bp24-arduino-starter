@@ -39,12 +39,17 @@ long task_timer = 0; // variable to keep track of how much time has elapsed
 long task_time_limit = 3000; // set the amount of time a player has to complete the task (3000 milliseconds = 3 seconds)
 long task_pause = 1000; // set the amount of pause time between tasks
 
+// helper function to write to display
+void write_to_display(String message) {
+  display.clearDisplay();
+  display.setCursor(0, 10);
+  display.println(message);
+  display.display();
+}
+
 void setup() {
   // put your setup code here, to run once:
   
-  Serial.begin(9600); // start the serial at a baud rate of 115200
-  Serial.println("Starting program...");
-
   Serial.begin(9600);
   Serial.println("Starting program...");
   pinMode(RED_LED, OUTPUT);
@@ -54,17 +59,15 @@ void setup() {
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BTN, INPUT_PULLUP);
 
+  // initialize display
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println("SSD1306 allocation failed");
     for(;;); // Don't proceed, loop forever
   }
-
   display.clearDisplay();
+  display.display();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0, 10);
-  display.println("Welcome to Bop It!");
-  display.display();
 
   randomSeed(analogRead(5)); // initialize the random number generator with arbitrary data noise from a digital pin
 

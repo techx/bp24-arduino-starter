@@ -38,12 +38,27 @@ long task_timer = 0; // variable to keep track of how much time has elapsed
 long task_time_limit = 3000; // set the amount of time a player has to complete the task (3000 milliseconds = 3 seconds)
 long task_pause = 1000; // set the amount of pause time between tasks
 
+// helper function to write to display
+void write_to_display(String message) {
+  display.clearDisplay();
+  display.setCursor(0, 10);
+  display.println(message);
+  display.display();
+}
+
+// helper function to blink LED a specific number of times
+void blink_led(int num_blinks) {
+  for (int i = 0; i < num_blinks; i++) {
+    digitalWrite(RED_LED, HIGH);
+    delay(300);
+    digitalWrite(RED_LED, LOW);
+    delay(300);
+  }
+}
+
 void setup() {
   // put your setup code here, to run once:
   
-  Serial.begin(9600); // start the serial at a baud rate of 115200
-  Serial.println("Starting program...");
-
   Serial.begin(9600);
   Serial.println("Starting program...");
   pinMode(RED_LED, OUTPUT);
@@ -53,27 +68,28 @@ void setup() {
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BTN, INPUT_PULLUP);
 
+  // initialize display
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println("SSD1306 allocation failed");
     for(;;); // Don't proceed, loop forever
   }
-
   display.clearDisplay();
+  display.display();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0, 10);
-  display.println("Welcome to Bop It!");
-  display.display();
 
   randomSeed(analogRead(5)); // initialize the random number generator with arbitrary data noise from a digital pin
 
-	set_new_task();
+  set_new_task();
 }
+
 
 bool game_ended = false;
 
 void loop() {
   // put your main code here, to run repeatedly:
+
+  // main game state check
   if (millis() - task_timer > task_time_limit) {
     end_game();
   } else {
@@ -87,21 +103,14 @@ int last_pot_value = 0;
 
 void set_new_task() {
   delay(task_pause);
-  task = random(num_tasks); // set the task to a random number between 0 and num_tasks - 1 (3 - 1 = 2)
 
-  display.clearDisplay();
-  display.setCursor(0, 10);
-  display.println("Welcome to Bop It!");
-  display.display();
+  write_to_display("Welcome to Bop It!");
 
+  // set the task to a random number between 0 and num_tasks - 1 (3 - 1 = 2)
+  task = random(num_tasks); 
 	// blink the LED the number of times corresponding to a task
-	for (int i = 0; i <= task; i++) {
-		digitalWrite(RED_LED, HIGH);
-		delay(300);
-		digitalWrite(RED_LED, LOW);
-		delay(300);
-	}
-
+  blink_led(task + 1);
+  
 	// print the user's score and the new task to Serial
 	Serial.println();
 	Serial.print("Your score: ");
@@ -120,14 +129,7 @@ void set_new_task() {
 
 void end_game() {
 	digitalWrite(RED_LED, LOW);
-	display.clearDisplay();
-	display.setCursor(0, 10);
-	display.println("Game over!");
-	display.print("Your score: ");
-	display.println(game_score);
-	display.display();
-  Serial.print("END GAME, score: ");
-  Serial.println(game_score);
+  write_to_display("Game over!\n\nYour score: " + String(game_score));
   game_score = 0;
   set_new_task();
 }
@@ -139,12 +141,7 @@ void check_user_action() {
     int button_value = digitalRead(BUTTON); // read 
     if (button_value == LOW) { // since the button pin is set to INPUT_PULLUP, so LOW means pressed and HIGH means released
       game_score += 5; // add 5 points to the player's game score
-
-      display.clearDisplay();
-      display.setCursor(0, 10);
-      display.print("+5");
-      display.display();
-
+      write_to_display("+5");
       set_new_task();
     }
   } else if (task == POTENTIOMETER) {
@@ -155,12 +152,7 @@ void check_user_action() {
     if ((last_pot_value < 512 && pot_value > 700) ||
         (last_pot_value > 512 && pot_value < 300)) {
       game_score += 7; // add 7 points to the player's game score
-
-      display.clearDisplay();
-      display.setCursor(0, 10);
-      display.print("+7");
-      display.display();
-
+      write_to_display("+7");
       set_new_task();
     }
   } else if (task == JOYSTICK) {
@@ -170,12 +162,7 @@ void check_user_action() {
     // if the joystick value has been pushed far enough, the task is done
     if (joystick_value > 900) {
       game_score += 10; // add 10 points to the player's game score
-      
-      display.clearDisplay();
-      display.setCursor(0, 10);
-      display.print("+10");
-      display.display();
-
+      write_to_display("+10");
       set_new_task();
     }
   } else if (task == ULTRASONIC_SENSOR) {
@@ -183,12 +170,7 @@ void check_user_action() {
     int distance = sonar.ping_cm();
     if (distance < 10) {
       game_score += 15; // add 15 points to the player's game score
-      
-      display.clearDisplay();
-      display.setCursor(0, 10);
-      display.print("+15");
-      display.display();
-
+      write_to_display("+15");
       set_new_task();
     }
   }
