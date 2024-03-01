@@ -24,15 +24,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const int num_tasks = 4; // set the number of tasks to 3
 long game_score = 0; // set the player's game score to 0
 
-// define an enum of certain game actions the player needs to do:
+// define the game actions the player needs to do:
 // press a button, twist a potentiometer, push a joystick, or none
-enum game_action {
-  PUSH_BUTTON,
-  POTENTIOMETER,
-  JOYSTICK,
-  ULTRASONIC_SENSOR
-};
-game_action task;
+long PUSH_BUTTON = 0;
+long POTENTIOMETER = 1;
+long JOYSTICK = 2;
+long ULTRASONIC_SENSOR = 3;
+
+long task;
 
 long task_timer = 0; // variable to keep track of how much time has elapsed
 long task_time_limit = 3000; // set the amount of time a player has to complete the task (3000 milliseconds = 3 seconds)
