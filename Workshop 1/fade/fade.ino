@@ -5,25 +5,33 @@ void setup() {
   pinMode(RED_LED, OUTPUT);
 }
 
-int led_brightness = 255;
-
-bool fade_led() {
-  if (led_brightness >= 0) {
-    analogWrite(RED_LED, led_brightness);
-    led_brightness -= 1;
-    return false;
+// helper function to blink LED a specific number of times
+void blink_led(int num_blinks) {
+  for (int i = 0; i < num_blinks; i++) {
+    digitalWrite(RED_LED, HIGH);
+    delay(300);
+    digitalWrite(RED_LED, LOW);
+    delay(300);
   }
-  else {
-    return true;
+}
+
+// helper function to fade LED up and down
+void fade_led() {
+  // Make LED brighter
+  for (int i = 0; i < 255; i += 1) {
+    analogWrite(RED_LED, i);
+    delay(10);
+  }
+
+  // Make LED dimmer
+  for (int i = 255; i >= 0; i -= 1) {
+    analogWrite(RED_LED, i);
+    delay(10);
   }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:  
-  bool led_is_off = fade_led();
-  delay(10);
-
-  if (led_is_off) {
-    led_brightness = 255;
-  }
+  // put your main code here, to run repeatedly:
+//  blink_led(1);
+  fade_led();
 }

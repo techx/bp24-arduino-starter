@@ -1,19 +1,32 @@
 #include <NewPing.h> // include the ultrasonic sensor library
+#include <Wire.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
 #include <Servo.h>  // include the Servo library
 #include "TimerFreeTone.h"
 
 #define RED_LED 11
 #define BUTTON 12
 #define POT_PIN A0
+
 #define JOYSTICK_X A1
 #define JOYSTICK_Y A2
 #define JOYSTICK_BTN 7
+
 #define ULTRASONIC_TRIGGER 9
 #define ULTRASONIC_ECHO 10
 int max_ultrasonic_distance_cm = 400; // set the maximum measureable distance for the ultrasonic sensor to 400cm 
 NewPing sonar(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO, max_ultrasonic_distance_cm); 
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET     -1 
+#define SCREEN_ADDRESS 0x3C 
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 #define SERVO 6
 Servo servo;
+
 #define BUZZER 3
 // Global Variable
 int notes[5] = {440, 494, 523, 587, 659};
@@ -29,38 +42,48 @@ void setup() {
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BTN, INPUT_PULLUP);
 
-  digitalWrite(RED_LED, HIGH);
-  delay(500);
-  digitalWrite(RED_LED, LOW);
-  delay(500);
-  digitalWrite(RED_LED, HIGH);
-  delay(500);
-  digitalWrite(RED_LED, LOW);
-  delay(500);
-  digitalWrite(RED_LED, HIGH);
-  delay(500);
-  digitalWrite(RED_LED, LOW);
-  delay(500);
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println("SSD1306 allocation failed");
+    for(;;); // Don't proceed, loop forever
+  }
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 10);
+  display.println("Hello World!");
+  display.display();
 
   servo.attach(SERVO);
   servo.write(0);
 
   pinMode(BUZZER, OUTPUT);
 
-  // PASSIVE BUZZER ONLY:
   play_song();
 }
 
-int led_brightness = 255;
-
-bool fade_led() {
-  if (led_brightness >= 0) {
-    analogWrite(RED_LED, led_brightness);
-    led_brightness -= 1;
-    return false;
+// helper function to blink LED a specific number of times
+void blink_led(int num_blinks) {
+  for (int i = 0; i < num_blinks; i++) {
+    digitalWrite(RED_LED, HIGH);
+    delay(300);
+    digitalWrite(RED_LED, LOW);
+    delay(300);
   }
-  else {
-    return true;
+}
+
+// helper function to fade LED up and down
+void fade_led() {
+  // Make LED brighter
+  for (int i = 0; i < 255; i += 1) {
+    analogWrite(RED_LED, i);
+    delay(10);
+  }
+
+  // Make LED dimmer
+  for (int i = 255; i >= 0; i -= 1) {
+    analogWrite(RED_LED, i);
+    delay(10);
   }
 }
 
@@ -81,13 +104,11 @@ void read_ultrasonic_sensor() {
 
   Serial.print(" Ultrasonic: ");
   Serial.println(ultrasonic_distance_cm);
+
+  Serial.println();
 }
 
 void spin_servo(int start_pos, int end_pos) {
-  /*
-   * Spins the servo from start_pos to end_pos
-   */
-  // EXPLAIN FOR LOOP BEFORE CODING THIS
   if (start_pos < end_pos) {  // Servo position should increase from start to end
     for (int pos = start_pos; pos <= end_pos; pos++) {
       servo.write(pos);
@@ -133,13 +154,13 @@ void play_song() {
 
 void loop() {
   // put your main code here, to run repeatedly:  
-  bool led_is_off = fade_led();
-  delay(10);
+//  blink_led(1);
+//  fade_led();
 
   int button = digitalRead(BUTTON);
 
-  if (button == 0) {
-    led_brightness = 255;
+  if (button == 0) {  // button pressed
+    fade_led();
   }
 
   int pot_value = analogRead(POT_PIN); // read the analog value going into the potentiometer pin
@@ -151,5 +172,6 @@ void loop() {
 
   spin_servo(0, 180);
 
-//  buzz();
+  buzz();
+  delay(100);
 }
