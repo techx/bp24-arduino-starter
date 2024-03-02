@@ -167,7 +167,7 @@ void check_user_action() {
   } else if (task == ULTRASONIC_SENSOR) {
     // check if the ultrasonic sensor has been triggered
     int distance = sonar.ping_cm();
-    if (distance < 10) {
+    if (distance > 0 && distance < 10) {
       game_score += 15; // add 15 points to the player's game score
       write_to_display("+15");
       set_new_task();
